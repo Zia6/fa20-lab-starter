@@ -55,7 +55,6 @@ main:
 # FIXME Fix the reported error in this function (you can delete lines
 # if necessary, as long as the function still returns 1 in a0).
 simple_fn:
-    mv a0, t0
     li a0, 1
     ret
 
@@ -77,7 +76,12 @@ simple_fn:
 naive_pow:
     # BEGIN PROLOGUE
     # END PROLOGUE
+
+    addi sp, sp, -8   # Allocate space for ra and s0
+    sw ra, 0(sp)      # Save return address
+    sw s0, 4(sp)
     li s0, 1
+    
 naive_pow_loop:
     beq a1, zero, naive_pow_end
     mul s0, s0, a0
@@ -87,6 +91,9 @@ naive_pow_end:
     mv a0, s0
     # BEGIN EPILOGUE
     # END EPILOGUE
+    lw ra, 0(sp)      # Restore return address
+    lw s0, 4(sp)      # Restore s0
+    addi sp, sp, 8 
     ret
 
 # Increments the elements of an array in-place.
@@ -100,8 +107,11 @@ inc_arr:
     #
     # FIXME What other registers need to be saved?
     #
-    addi sp, sp, -4
+    addi sp, sp, -16
     sw ra, 0(sp)
+    sw s0, 4(sp)
+    sw s1, 8(sp)
+    sw t0, 12(sp)
     # END PROLOGUE
     mv s0, a0 # Copy start of array to saved register
     mv s1, a1 # Copy length of array to saved register
@@ -123,7 +133,10 @@ inc_arr_loop:
 inc_arr_end:
     # BEGIN EPILOGUE
     lw ra, 0(sp)
-    addi sp, sp, 4
+    lw s0, 4(sp)
+    lw s1, 8(sp)
+    lw t0, 12(sp)
+    addi sp, sp, 16
     # END EPILOGUE
     ret
 
@@ -137,11 +150,17 @@ inc_arr_end:
 # as appropriate.
 helper_fn:
     # BEGIN PROLOGUE
+    addi sp, sp, -8
+    sw ra, 0(sp)
+    sw s0, 4(sp)
     # END PROLOGUE
     lw t1, 0(a0)
     addi s0, t1, 1
     sw s0, 0(a0)
     # BEGIN EPILOGUE
+    lw ra, 0(sp)
+    lw s0, 4(sp)
+    addi sp, sp, 8
     # END EPILOGUE
     ret
 
